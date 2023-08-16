@@ -1,4 +1,5 @@
 import React from "react";
+import { useState } from "react";
 //material ui
 //material ui
 import { FormControl, collapseClasses } from "@mui/material";
@@ -16,6 +17,17 @@ import TextField from "@mui/material/TextField";
 import Navbar from "../components/Navbar";
 
 export default function Register() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const handlesubmit = (e) => {
+    e.preventDefault();
+    console.log(email);
+    console.log("I am register");
+  };
+  const handleemail=(e)=>{
+    setEmail(e); 
+    console.log(email);
+  }
   return (
     <>
       <Navbar />
@@ -29,24 +41,24 @@ export default function Register() {
         variant="outlined"
       >
         <CardContent>
-          <Container
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              backgroundColor: "white",
-              // display:"flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Typography
-              align={"center"}
-              sx={{ marginTop: "10px", fontWeight: "bold" }}
+          <form onSubmit={handlesubmit}>
+            <Container
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                backgroundColor: "white",
+                // display:"flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
-              Register
-            </Typography>
-            <FormControl sx={{ width: "200px", marginBottom: "13px" }}>
+              <Typography
+                align={"center"}
+                sx={{ marginTop: "10px", fontWeight: "bold" }}
+              >
+                Register
+              </Typography>
               <TextField
                 id="filled-password-input"
                 label="Name"
@@ -54,36 +66,33 @@ export default function Register() {
                 autoComplete="current-password"
                 variant="standard"
               />
-              {/* <Input id="my-input" aria-describedby="my-helper-text" /> */}
-            </FormControl>
-            <FormControl
-              sx={{ width: "200px", marginBottom: "13px", marginTop: "0px" }}
-            >
               <TextField
                 id="filled-email-input"
                 label="Email"
                 type="email"
                 variant="standard"
+                sx={{ marginTop: "20px" }}
+                onChange={handleemail}
               />
-            </FormControl>
-            <FormControl sx={{ width: "200px", marginBottom: "13px" }}>
+
               <TextField
                 id="filled-password-input"
                 label="Password"
                 type="password"
                 autoComplete="current-password"
                 variant="standard"
+                sx={{ marginTop: "20px" }}
               />
-              {/* <Input id="my-input" aria-describedby="my-helper-text" /> */}
-            </FormControl>
-            
-            <Button
-              variant="contained"
-              sx={{ width: "200px", marginBottom: "1px", marginTop: "10px" }}
-            >
-              Register
-            </Button>
-          </Container>
+
+              <Button
+                variant="contained"
+                sx={{ width: "200px", marginBottom: "1px", marginTop: "30px" }}
+                type="submit"
+              >
+                Register
+              </Button>
+            </Container>
+          </form>
           {/* // </div> */}
         </CardContent>
       </Card>

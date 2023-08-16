@@ -16,6 +16,10 @@ import TextField from "@mui/material/TextField";
 // import Navbar from "../components/Navbar";
 import Navbar from "../components/Navbar";
 function Login() {
+  const handleformsubmit=(e)=>{
+    e.preventDefault();
+    console.log("I am log");
+  }
   return (
     // <>
     // <Card >
@@ -32,6 +36,7 @@ function Login() {
         variant="outlined"
       >
         <CardContent>
+            <form onSubmit={handleformsubmit} >
           <Container
             sx={{
               display: "flex",
@@ -43,45 +48,46 @@ function Login() {
               alignItems: "center",
             }}
           >
-            <Typography
-              align={"center"}
-              sx={{ marginTop: "10px", fontWeight: "bold" }}
-            >
-              LOGIN
-            </Typography>
-            <FormControl
-              sx={{ width: "200px", marginBottom: "13px", marginTop: "11px" }}
-            >
-              <TextField
-                id="filled-email-input"
-                label="Email"
-                type="email"
-                variant="standard"
-              />
-            </FormControl>
-            <FormControl sx={{ width: "200px", marginBottom: "13px" }}>
-              <TextField
-                id="filled-password-input"
-                label="Password"
-                type="password"
-                autoComplete="current-password"
-                variant="standard"
-              />
-              {/* <Input id="my-input" aria-describedby="my-helper-text" /> */}
-            </FormControl>
-            <Button
-              variant="contained"
-              sx={{ width: "200px", marginBottom: "13px" }}
-            >
-              Login
-            </Button>
+              <Typography
+                align={"center"}
+                sx={{ fontWeight: "bold" }}
+              >
+                LOGIN
+              </Typography>
+              {/* <FormControl */}
+                {/* sx={{ width: "200px", marginBottom: "13px", marginTop: "11px" }} */}
+              {/* > */}
+                <TextField
+                  id="filled-email-input"
+                  label="Email"
+                  type="email"
+                  variant="standard"
+                />
+              {/* </FormControl> */}
+              {/* <FormControl sx={{ width: "200px", marginBottom: "13px" }}> */}
+                <TextField
+                  id="filled-password-input"
+                  label="Password"
+                  type="password"
+                  autoComplete="current-password"
+                  variant="standard"
+                  sx={{marginTop:"20px"}}
+                />
+                {/* <Input id="my-input" aria-describedby="my-helper-text" /> */}
+              {/* </FormControl> */}
+              <Button type="submit"
+                variant="contained"
+                sx={{ width: "200px", marginBottom: "13px", marginTop:"25px"}}
+              >
+                Login
+              </Button>
           </Container>
+            </form>
           {/* // </div> */}
         </CardContent>
       </Card>
-      //{" "}
     </>
   );
-}
+} 
 
 export default Login;
