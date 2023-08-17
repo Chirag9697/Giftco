@@ -1,13 +1,14 @@
 const express=require('express');
-
+const bcrypt=require('bcrypt');
 const router=express.Router();
+const User=require('../mongoosemodel/user');
 
-
-
+// const db=require('../index');
+// db.collection('Uss')
 router.post('/login',async(req,res)=>{
     const{Username,password}=req.body;
-    const col=db.collection("User");   
-    const founduser=await col.findOne({Username:Username});
+    // const col=db.collection("User");   
+    const founduser=await User.findOne({Username:Username});
     if(founduser){
         const hash=founduser.password;  
         const found=await bcrypt.compare(password,hash);
@@ -27,14 +28,15 @@ router.post('/login',async(req,res)=>{
 router.post('/register',async(req,res)=>{
     const{Name,username,password}=req.body;
     console.log(req.body);
-    const col=db.collection("User");
+    // const col=db.collection("User");
     const hash=await bcrypt.hash(password, 10);
     if(hash){
-        const finddupuser=await col.findOne({username:username});
+        const finddupuser=await User.findOne({username:username});
         if(finddupuser){
             return res.status(400).send({error:"there is some error"});
         }
-        const saved=await col.insertOne({username:username,password:hash,Name:Name});
+        const newUser=new User({username:username,password:hash,Name:Name});
+        const saved=await newUser.save();
         // const saved=await newUser.save();
         console.log(saved);
         if(saved){
