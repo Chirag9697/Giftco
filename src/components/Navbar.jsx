@@ -6,13 +6,13 @@ import { Link } from 'react-router-dom';
 export default function Navbar() {
   return (
     <>
-       <AppBar component="nav">
+       <AppBar component="nav" sx={{marginBottom:"20px"}}>
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ mr: 2, display: { sm: 'none' }}}
           >
          
           </IconButton>

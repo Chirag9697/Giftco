@@ -1,4 +1,6 @@
 import React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 // import Link from "@mui/material";
 
 import { FormControl, collapseClasses } from "@mui/material";
@@ -16,9 +18,34 @@ import TextField from "@mui/material/TextField";
 // import Navbar from "../components/Navbar";
 import Navbar from "../components/Navbar";
 function Login() {
-  const handleformsubmit=(e)=>{
+  const navigate=useNavigate();
+  const[email,setEmail]=useState('');
+  const[alert,setAlert]=useState(false); 
+  const[password,setPassword]=useState('');
+  const handleformsubmit=async(e)=>{
     e.preventDefault();
-    console.log("I am log");
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: email, password: password }),
+    };
+    const response = await fetch(
+      "http://localhost:3001/login",
+      requestOptions
+    );
+    const res = await response.json();
+    if (!res.token) {
+      console.log("failed to login");
+      return;
+    }
+    navigate('/Home');
+    console.log("I am login");
+  }
+  const handleemail=(e)=>{  
+    setEmail(e.target.value);
+  }
+  const handlepassword=(e)=>{
+    setPassword(e.target.value);
   }
   return (
     // <>
@@ -62,6 +89,7 @@ function Login() {
                   label="Email"
                   type="email"
                   variant="standard"
+                  onChange={handleemail}
                 />
               {/* </FormControl> */}
               {/* <FormControl sx={{ width: "200px", marginBottom: "13px" }}> */}
@@ -72,6 +100,7 @@ function Login() {
                   autoComplete="current-password"
                   variant="standard"
                   sx={{marginTop:"20px"}}
+                  onChange={handlepassword}
                 />
                 {/* <Input id="my-input" aria-describedby="my-helper-text" /> */}
               {/* </FormControl> */}

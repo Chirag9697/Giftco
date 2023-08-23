@@ -2,13 +2,14 @@ const express=require('express');
 const bcrypt=require('bcrypt');
 const router=express.Router();
 const User=require('../mongoosemodel/user');
-
+const {createToken}=require('../authentication/auth');
 // const db=require('../index');
 // db.collection('Uss')
 router.post('/login',async(req,res)=>{
-    const{Username,password}=req.body;
+    // console.log("hello");
+    const{username,password}=req.body;
     // const col=db.collection("User");   
-    const founduser=await User.findOne({Username:Username});
+    const founduser=await User.findOne({username:username});
     if(founduser){
         const hash=founduser.password;  
         const found=await bcrypt.compare(password,hash);

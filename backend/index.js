@@ -7,6 +7,7 @@ const User=require('./mongoosemodel/user');
 const{createToken,verifyToken}=require('./authentication/auth');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const authrouter=require('./routes/auth-route');
+const giftrouter=require('./routes/gift-route');
 const uri = "mongodb+srv://chirag:chirag@nodeexpressprojects.qyynx.mongodb.net/?retryWrites=true&w=majority";
 const dbName = "tradify";
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -30,6 +31,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/',authrouter);
+app.use('/',giftrouter);
 app.get('/',(req,res)=>{
     console.log("hello I am get");
 })

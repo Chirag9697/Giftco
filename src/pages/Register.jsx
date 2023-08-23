@@ -1,5 +1,8 @@
 import React from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {Alert} from '@mui/material';
+import Stack from '@mui/material/Stack';
 //material ui
 //material ui
 import { FormControl, collapseClasses } from "@mui/material";
@@ -19,22 +22,57 @@ import Navbar from "../components/Navbar";
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const handlesubmit = (e) => {
+  const[alert,setAlert]=useState("false");
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const handlesubmit = async (e) => {
     e.preventDefault();
-    console.log(email);
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name, username: email, password: password }),
+    };
+    const response = await fetch(
+      "http://localhost:3001/register",
+      requestOptions
+    );
+    const res = await response.json();
+    if (!res.success) {
+      console.log("failed to register");
+      return;
+    }
+    // setTimeout(() => {
+      // }, 2000);
+    setAlert("true");
+    // setInterval(() => {  
+    // }, 1000);
+    setTimeout(() => {
+      setAlert("false");  
+      navigate("/login");
+      
+    }, 1000);
     console.log("I am register");
   };
-  const handleemail=(e)=>{
-    setEmail(e); 
-    console.log(email);
-  }
+  const handleemail = (e) => {
+    // );
+    setEmail(e.target.value);
+  };
+  const handlepassword = (e) => {
+    setPassword(e.target.value);
+  };
+  const handlename = (e) => {
+    setName(e.target.value);
+  };
   return (
     <>
       <Navbar />
+      <Container>
+          {alert=="true"?<Alert severity="success" sx={{marginTop:"65px"}}>successfully registered</Alert>:<></>}
+      </Container>
       <Card
         sx={{
           width: "25vw",
-          marginTop: "20vh",
+          marginTop: "100px",
           marginLeft: "35vw",
           boxShadow: "10",
         }}
@@ -65,6 +103,7 @@ export default function Register() {
                 type="text"
                 autoComplete="current-password"
                 variant="standard"
+                onChange={handlename}
               />
               <TextField
                 id="filled-email-input"
@@ -81,6 +120,7 @@ export default function Register() {
                 type="password"
                 autoComplete="current-password"
                 variant="standard"
+                onChange={handlepassword}
                 sx={{ marginTop: "20px" }}
               />
 
