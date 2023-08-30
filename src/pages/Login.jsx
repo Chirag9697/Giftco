@@ -34,10 +34,13 @@ function Login() {
       requestOptions
     );
     const res = await response.json();
+    localStorage.setItem("token",res.token);
+    console.log("token",res.token);
     if (!res.token) {
       console.log("failed to login");
       return;
     }
+    // console.log(res);
     navigate('/Home');
     console.log("I am login");
   }

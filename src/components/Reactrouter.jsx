@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Register from '../pages/Register';
 import Login from '../pages/Login';
 import Homepage from '../pages/Homepage';
+import Trackgiftspage from '../pages/Trackgiftspage';
 export default function Reactrouter() {
 
   return (
@@ -15,6 +16,7 @@ export default function Reactrouter() {
           <Route path="/register" element={<Register />} />
           <Route path="/Login" element={<Login />} />
           <Route path="/Home" element={<Homepage/>} />
+          <Route path="/trackgifts" element={<Trackgiftspage/>} />
           
           <Route path="*" element={<Register />} />
         {/* </Route> */}

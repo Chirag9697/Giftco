@@ -1,20 +1,14 @@
 const mongoose=require('mongoose');
 const {Schema}=mongoose;
 const User=require('./user');
-const loginschema=new Schema({
+const trackschema=new Schema({
     nameofgift:{
         type:String
     },
-    description:{
+    price:{
         type:String
     },
     towhom:{
-        type:String
-    },
-    price:{
-        type:Number
-    },
-    link:{
         type:String
     },
     user:{
@@ -22,5 +16,5 @@ const loginschema=new Schema({
     },
     
 })
-const Gift=mongoose.model('Gift',loginschema);
+const Gift=mongoose.model('Trackschema',trackschema);
 module.exports=Gift;

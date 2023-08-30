@@ -1,6 +1,17 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
+// import Link from "@mui/material";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
+
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -13,18 +24,20 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
+import Alert from '@mui/material/Alert';
 import AdbIcon from "@mui/icons-material/Adb";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 // import {Button} from "@mui/material";
 import { TextField } from "@mui/material";
-
+import { Navigate, useNavigate } from "react-router-dom";
+// useNavigategate
 import { Chart } from "react-google-charts";
 
 const pages = ["Home", "TrackGIFTS"];
@@ -36,46 +49,81 @@ export default function Homepage() {
   const [finalbudget, setFinalBudget] = useState(1000);
   const [open, setOpen] = React.useState(false);
   const [open2, setOpen2] = React.useState(false);
-  const[name,setName]=useState("");
-  const[description,setDescription]=useState("");
-  const[price,setPrice]=useState(0);
-  const[towhom,setTowhom]=useState("");
-  const[link,setLink]=useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState(0);
+  const [towhom, setTowhom] = useState("");
+  const [link, setLink] = useState("");
   const [gifts, setGifts] = useState([]);
-  const[expenses,setExpenses]=useState([["expenses","costs"],["mobile","1000"]]);
-  const[giftdesc,setGiftdesc]=useState({id:"",name:"",description:"",price:0});
+  const [totalexpense,setTotalexpense]=useState(0);
+  const[loss,setLoss]=useState(false);
+  const [expenses, setExpenses] = useState([
+    ["expenses", "costs"],
+    ["mobile", "1000"],
+  ]);
+  const [giftdesc, setGiftdesc] = useState({
+    id: "",
+    name: "",
+    description: "",
+    price: 0,
+  });
+  const tok =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZ…U4OX0.eLeZ_nGGGvYnOd5P-Os14i6htkyX-7RHk5i4iSNv-rE";
+  const navigate = useNavigate();
   var budget = 1000;
   var newexpenses;
   // const expenses=["expenses","costs"]
-  
-  const data1=expenses;
 
-  console.log("data1",data1);
+  const data1 = expenses;
+
+  console.log("data1", data1);
   const data2 = [
     ["Budget", "Total"],
     ["Budget", finalbudget],
   ];
   const getallgifts = async () => {
+    if(!localStorage['token']){
+      navigate('/');
+      return ;
+    }
     const requestOptions = {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      // body: JSON.stringify({ name: name, username: email, password: password }),
+      // method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage["token"],
+      },
     };
     console.log("helo");
-    const response = await fetch(
+    const response = await axios.get(
       "http://localhost:3001/getallgift",
       requestOptions
     );
-    const obtgifts = await response.json();
-    // console.log(obtgifts);
-    newexpenses=[["expenses","cost"]];
-    obtgifts.map((gift)=>{
-      newexpenses.push([`${gift.nameofgift}`,gift.price]);
-    })
-    console.log("expenses",expenses);
+    const obtgifts = await response.data;
+    console.log("obtgifts", obtgifts);
+    if (obtgifts.error) {
+      navigate("/");
+      return;
+    }
+    // console.log(obtgifts);\
+    var newtotalexpense=0;
+    for(var i=0;i<obtgifts.length;i++){
+      newtotalexpense=newtotalexpense+obtgifts[i].price;
+    }
+    newexpenses = [["expenses", "cost"]];
+    obtgifts.map((gift) => {
+      newexpenses.push([`${gift.nameofgift}`, gift.price]);
+    });
+    console.log("expenses", expenses);
     // updateexpenses();
     setGifts(obtgifts);
     setExpenses(newexpenses);
+    if(newtotalexpense>finalbudget){
+      setLoss(true);
+    }
+    else{
+      setLoss(false);
+    }
+    setTotalexpense(newtotalexpense)
   };
   // const updateexpenses=()=>{
   // }
@@ -91,6 +139,12 @@ export default function Homepage() {
 
   const handlebudgetsubmit = (e) => {
     e.preventDefault();
+    if(budget<totalexpense){
+      setLoss(true);
+    }
+    else{
+      setLoss(false);
+    }
     setFinalBudget(budget);
   };
   const handleOpenNavMenu = (event) => {
@@ -107,31 +161,39 @@ export default function Homepage() {
   };
 
   const handleClose = () => {
-
     setOpen(false);
   };
   const handleClose2 = () => {
-
     setOpen2(false);
   };
-  const handleCloseAndAddGift=async(e)=>{
+  const handleCloseAndAddGift = async (e) => {
     e.preventDefault();
     const requestOptions = {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({nameofgift:name,description:description,price: price }),
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage["token"],
+      },
+      body: JSON.stringify({
+        nameofgift: name,
+        description: description,
+        price: price,
+        towhom: towhom,
+        link: link,
+      }),
     };
     const response = await fetch(
       "http://localhost:3001/addgift",
       requestOptions
     );
-    const res=await response.json();
+    const res = await response.json();
+    console.log(res);
     // console.log(response);
-    if(res.success){
-        setOpen(false);
-        getallgifts();
+    if (res.success) {
+      setOpen(false);
+      getallgifts();
     }
-  }
+  };
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
@@ -139,32 +201,40 @@ export default function Homepage() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
-  const handleaddnewgifts=(e)=>{
+  const handleaddnewgifts = (e) => {
     e.preventDefault();
     setOpen(true);
-  }
-  const handleName=(e)=>{
+  };
+  const handleName = (e) => {
     setName(e.target.value);
-  }
-  const handledescription=(e)=>{
+  };
+  const handledescription = (e) => {
     setDescription(e.target.value);
-  }
-  const handlePrice=(e)=>{
+  };
+  const handlePrice = (e) => {
     setPrice(e.target.value);
-  }
-  const handletowhom=(e)=>{
+  };
+  const handletowhom = (e) => {
     setTowhom(e.target.value);
+  };
+  const handlelogout=()=>{
+    localStorage.removeItem('token');
+    console.log(localStorage['token']);
+    navigate('/')
+    console.log('logout');
   }
-  const handlelink=(e)=>{
+  const handlelink = (e) => {
     setLink(e.target.value);
-  }
-  const handledelete=async(key)=>
-  {
+  };
+  const handledelete = async (key) => {
     // e.preventDefault();
     console.log("hello");
     const requestOptions = {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage["token"],
+      },
       // body: JSON.stringify({nameofgift:name,description:description,price: price }),
     };
     const response = await fetch(
@@ -172,38 +242,61 @@ export default function Homepage() {
       requestOptions
     );
     getallgifts();
-  }
-  const handleupdate=async(key)=>{
+  };
+  const handleupdate = async (key) => {
+    console.log(key);
     const requestOptions = {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage["token"],
+      },
       // body: JSON.stringify({nameofgift:name,description:description,price: price }),
     };
-    const response=await fetch(`http://localhost:3001/getonegift/${key}`,requestOptions);
-    const gift=await response.json();
+    const response = await fetch(
+      `http://localhost:3001/getonegift/${key}`,
+      requestOptions
+    );
+    const gift = await response.json();
     console.log(gift);
-    const newgiftdesc={id:key,name:gift.nameofgift,price:gift.price,description:gift.description};
+    const newgiftdesc = {
+      id: key,
+      name: gift.nameofgift,
+      price: gift.price,
+      description: gift.description,
+      towhom: gift.towhom,
+      link: gift.link,
+    };
     setGiftdesc(newgiftdesc);
     setOpen2(true);
-  }
-  const handleCloseAndAddGift2=async(e)=>{
+  };
+  const handleCloseAndAddGift2 = async (e) => {
     e.preventDefault();
     const requestOptions = {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({nameofgift:name,description:description,price: price }),
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage["token"],
+      },
+      body: JSON.stringify({
+        nameofgift: name,
+        description: description,
+        price: price,
+        towhom: towhom,
+        link: link,
+      }),
     };
-    const response = await fetch( 
+    const response = await fetch(
       `http://localhost:3001/updategift/${giftdesc.id}`,
       requestOptions
     );
-    const res=await response.json();
+    const res = await response.json();
     // console.log(response);
-    if(res.success){
-        setOpen2(false);
-        getallgifts();
+    if (res.success) {
+      setOpen2(false);
+      getallgifts();
     }
-  }
+  };
 
   useEffect(() => {
     getallgifts();
@@ -254,6 +347,9 @@ export default function Homepage() {
                 <MenuItem onClick={handleCloseNavMenu}>
                   <Typography textAlign="center">Home</Typography>
                 </MenuItem>
+                <MenuItem onClick={handleCloseNavMenu}>
+                  <Typography textAlign="center">TrackGIFTS</Typography>
+                </MenuItem>
                 {/* ))} */}
               </Menu>
             </Box>
@@ -276,21 +372,36 @@ export default function Homepage() {
               GIFTCO
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              {pages.map((page) => (
+              {/* {pages.map((page) => ( */}
+                <Link to='/Home' style={{textDecoration:"none"}}>
                 <Button
-                  key={page}
+                  // key={page}
+                  onClick={handleCloseNavMenu}
+                  sx={{ my: 2, color: "white", display: "block" ,textDecoration:"none"}}
+                  >
+                  Home
+                </Button>
+                  </Link>
+                  <Link to='/trackgifts' style={{textDecoration:"none"}}>
+                <Button
+                  // key={page}
                   onClick={handleCloseNavMenu}
                   sx={{ my: 2, color: "white", display: "block" }}
-                >
-                  {page}
+                  >
+                  TrackGifts
                 </Button>
-              ))}
+                  </Link>
+              {/* ))} */}
             </Box>
 
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                  {/* <Avatar sx={{ bgcolor: "blue",width:"100px" }}>Giftco</Avatar> */}
+                  <Button variant="contained">
+                    Logout
+                  </Button>
+
                 </IconButton>
               </Tooltip>
               <Menu
@@ -309,11 +420,12 @@ export default function Homepage() {
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
               >
-                {settings.map((setting) => (
-                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center">{setting}</Typography>
-                  </MenuItem>
-                ))}
+                <MenuItem onClick={handleCloseUserMenu}>
+                  <Typography textAlign="center" onClick={handlelogout}>
+                    Logout
+                  </Typography>
+                </MenuItem>
+                {/* ))} */}
               </Menu>
             </Box>
           </Toolbar>
@@ -393,6 +505,12 @@ export default function Homepage() {
       >
         ALL your Gifts
       </Typography>
+      <Container>
+        
+      {
+        loss && <Alert severity="warning">Over expenses- you are falling short by Rs {totalexpense-finalbudget}</Alert>
+      }
+      </Container>
       <Container
         sx={{
           display: "flex",
@@ -402,184 +520,256 @@ export default function Homepage() {
           my: "20px",
         }}
       >
-        {gifts.map((gift) => {
-          return (
-            <Card key={gift._id}
-              sx={{
-                minWidth: 500,
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom:"10px"
-              }}
-            >
-              <CardContent>
-                <Typography sx={{ fontSize: 25 }} color="black" gutterBottom>
+          <TableContainer component={Paper} sx={{ marginTop: "20px" }}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell
+                align="right"
+                sx={{
+                  width: "250px",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+                GiftName
+              </TableCell>
+              <TableCell
+                align="right"
+                sx={{
+                  width: "250px",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+                Towhom
+              </TableCell>
+              <TableCell
+                align="right"
+                sx={{
+                  width: "250px",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}  
+              >
+                Price
+              </TableCell>
+              <TableCell
+                align="right"
+                sx={{
+                  width: "250px",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}  
+              >
+                Link
+              </TableCell>
+              <TableCell
+                align="right"
+                sx={{
+                  width: "250px",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+                Action
+              </TableCell>
+              {/* <TableCell align="right"></TableCell> */}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {gifts.map((gift,index) => (
+              <TableRow
+                key={index}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell
+                  component="th"
+                  scope="row"
+                  sx={{ textAlign: "center" }}
+                >
                   {gift.nameofgift}
-                </Typography>
-                <Typography variant="h5" component="div">
+                </TableCell>
+                <TableCell align="right" sx={{ textAlign: "center" }}>
                   {gift.towhom}
-                </Typography>
-                <Typography variant="body2">{gift.description}</Typography>
-              </CardContent>
-              <CardActions>
-                {/* <form onSubmit={handledelete(gift._id)}> */}
-                  <Button  onClick={()=>handledelete(gift._id)} variant="contained" color="error" type="submit" >
-                    DELETE
-                  </Button>
-                {/* </form> */}
-                {/* <form> */}
-                  <Button variant="contained" color="success" onClick={()=>handleupdate(gift._id)}>
+                </TableCell>
+                <TableCell align="right" sx={{ textAlign: "center" }}>
+                  RS {gift.price}
+                </TableCell>
+                <TableCell align="right" sx={{ textAlign: "center" }}>
+                <a href={gift.link}>LINK</a>
+                </TableCell>
+                <TableCell align="right" sx={{ textAlign: "center" }}>
+                  <Button variant="contained" onClick={()=>handleupdate(gift._id)}>
                     Update
                   </Button>
-                {/* </form> */}
-              </CardActions>
-            </Card>
-          );
-        })}
-      </Container>
+                  <Button variant="contained" onClick={()=>handledelete(gift._id)} sx={{backgroundColor:"red"}}>
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       
+      </Container>
+
       <Container>
-        <form style={{ display: "flex", justifyContent: "center" }} onSubmit={handleaddnewgifts}>
-          <Button variant="contained" type="submit" sx={{ fontWeight: "500px" }}>
+        <form
+          style={{ display: "flex", justifyContent: "center" }}
+          onSubmit={handleaddnewgifts}
+        >
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{ fontWeight: "500px",marginBottom:"20px" }}
+          >
             AddnewGifts
           </Button>
         </form>
       </Container>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Add new Gift</DialogTitle>
-          <form onSubmit={handleCloseAndAddGift}>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            label="Name of Gift"
-            type="text"
-            fullWidth
-            variant="standard"
-            onChange={handleName}
-            required
-          />
-          <TextField
-            autoFocus
-            margin="dense"
-            id="desc"
-            label="Description"
-            type="text"
-            fullWidth
-            variant="standard"
-            onChange={handledescription}
-            required
-          />
-             <TextField
-            autoFocus
-            margin="dense"
-            id="Price"
-            label="price"
-            type="number"
-            fullWidth
-            variant="standard"
-            onChange={handlePrice}
-            required
-          />
-             <TextField
-            autoFocus
-            margin="dense"
-            id="towhom"
-            label="To Whom"
-            type="number"
-            fullWidth
-            variant="standard"
-            onChange={handletowhom}
-            required
-          />
-             <TextField
-            autoFocus
-            margin="dense"
-            id="Link"
-            label="Link"
-            type="url"
-            fullWidth
-            variant="standard"
-            onChange={handlelink}
-            required
-          />
-        </DialogContent>
-        <DialogActions>
+        <form onSubmit={handleCloseAndAddGift}>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Name of Gift"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={handleName}
+              required
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="desc"
+              label="Description"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={handledescription}
+              required
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="Price"
+              label="price"
+              type="number"
+              fullWidth
+              variant="standard"
+              onChange={handlePrice}
+              required
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="towhom"
+              label="To Whom"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={handletowhom}
+              required
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="Link"
+              label="Link"
+              type="url"
+              fullWidth
+              variant="standard"
+              onChange={handlelink}
+              required
+            />
+          </DialogContent>
+          <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
             <Button type="submit">Add Gift</Button>
-        </DialogActions>
-          </form>
+          </DialogActions>
+        </form>
       </Dialog>
       <Dialog open={open2} onClose={handleClose2}>
         <DialogTitle>Update your gift</DialogTitle>
-          <form onSubmit={handleCloseAndAddGift2}>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            label="Name of Gift"
-            type="text"
-            fullWidth
-            variant="standard"
-            onChange={handleName}
-            defaultValue={giftdesc.name}
-            required
-          />
-          <TextField
-            autoFocus
-            margin="dense"
-            id="desc"
-            label="Description"
-            type="text"
-            fullWidth
-            variant="standard"
-            onChange={handledescription}
-            defaultValue={giftdesc.description}
-            required
-          />
-             <TextField
-            autoFocus
-            margin="dense"
-            id="Price"
-            label="price"
-            type="number"
-            fullWidth
-            variant="standard"
-            onChange={handlePrice}
-            defaultValue={giftdesc.price}
-            required
-          />
-             <TextField
-            autoFocus
-            margin="dense"
-            id="towhom"
-            label="To Whom"
-            type="number"
-            fullWidth
-            variant="standard"
-            onChange={handletowhom}
-            required
-          />
-             <TextField
-            autoFocus
-            margin="dense"
-            id="Link"
-            label="Link"
-            type="url"
-            fullWidth
-            variant="standard"
-            onChange={handlelink}
-            required
-          />
-        </DialogContent>
-        <DialogActions>
+        <form onSubmit={handleCloseAndAddGift2}>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Name of Gift"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={handleName}
+              defaultValue={giftdesc.name}
+              required
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="desc"
+              label="Description"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={handledescription}
+              defaultValue={giftdesc.description}
+              required
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="Price"
+              label="price"
+              type="number"
+              fullWidth
+              variant="standard"
+              onChange={handlePrice}
+              defaultValue={giftdesc.price}
+              required
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="towhom"
+              label="To Whom"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={handletowhom}
+              defaultValue={giftdesc.towhom}
+              required
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="Link"
+              label="Link"
+              type="url"
+              fullWidth
+              variant="standard"
+              onChange={handlelink}
+              defaultValue={giftdesc.link}
+              required
+            />
+          </DialogContent>
+          <DialogActions>
             <Button onClick={handleClose2}>Cancel</Button>
             <Button type="submit">Update Gift</Button>
-        </DialogActions>
-          </form>
+          </DialogActions>
+        </form>
       </Dialog>
     </>
   );

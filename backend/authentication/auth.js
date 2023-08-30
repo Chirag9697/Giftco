@@ -4,12 +4,15 @@ const User=require('../mongoosemodel/user')
 
 const createToken=(user)=>{     
     console.log(user);
-    const token=jwt.sign({Username:user.Username,password:user.password},privatekey);
+    console.log(user.username);
+    const token=jwt.sign({Username:user.username,password:user.password},privatekey);
     // console.log(token);
     return token;
 }
 
 const verifyToken=async(req,res,next)=>{
+    console.log("verifying token sachi");
+    console.log("hello");
     const token=req.headers['token'];
     console.log(token);
     // console.log(req.cookies);
@@ -18,8 +21,10 @@ const verifyToken=async(req,res,next)=>{
     }
     try{
         const decoded=jwt.verify(token,privatekey);
-        const user=await User.findOne({Username:decoded.Username});
+        console.log("usrs",decoded);
+        const user=await User.findOne({username:decoded.Username});
         // console.log(user);
+        // console.log("users",user);
         req.user=user;
         console.log(req.user)
         // console.log(req.user);
